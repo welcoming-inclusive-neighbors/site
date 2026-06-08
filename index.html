@@ -103,21 +103,41 @@
 </svg>
 
 <!-- CTA -->
-<section class="winn-cta">
-  <p class="winn-cta-helper">
-    Hanover's Welcoming and Inclusive Neighbors network is primarily about
-    <strong>information sharing and education</strong> — connecting neighbors who care
-    about housing, sustainability, and a more vibrant Hanover. Join our list to stay in the know.
-  </p>
-  <div class="winn-cta-form">
-    <input class="winn-email-input" type="email" id="emailInput" placeholder="your@email.com" aria-label="Email address" />
-    <button class="winn-cta-btn" onclick="joinGroup()">Stay in touch</button>
-  </div>
-  <p class="winn-cta-note">Low volume. No spam. Unsubscribe anytime.</p>
-  <p id="cta-confirm">Thanks! We'll be in touch soon. Welcome to the network.</p>
-</section>
-
-<!-- RIVER DIVIDER 2 -->
+<form
+  class="winn-cta-form"
+  action="https://formspree.io/f/xlgkbdyk"
+  method="POST"
+>
+  <input
+    class="winn-email-input"
+    type="email"
+    name="email"
+    id="emailInput"
+    placeholder="your@email.com"
+    aria-label="Email address"
+    required
+  />
+  <input
+    type="hidden"
+    name="_subject"
+    value="New WINN subscriber"
+  />
+  <input
+    type="hidden"
+    name="_replyto"
+    value="win-network@googlegroups.com"
+  />
+  <button class="winn-cta-btn" type="submit">Stay in touch</button>
+  <input
+  type="hidden"
+  name="_next"
+  value="https://welcoming-inclusive-neighbors.github.io/site/?thanks=true"
+/>
+</form>
+<p class="winn-cta-note">Low volume. No spam. Unsubscribe anytime.</p>
+<p id="cta-confirm">Thanks! We'll be in touch soon. Welcome to the network.</p>
+  
+  <!-- RIVER DIVIDER 2 -->
 <svg class="river-svg" viewBox="0 0 1440 36" height="36" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
   <path d="M0,18 C180,4 360,32 600,18 C820,4 1040,32 1240,18 C1340,10 1400,26 1440,18" fill="none" stroke="#2176AE" stroke-width="8" stroke-linecap="round"/>
 </svg>
@@ -218,17 +238,8 @@
 
   startTimer();
 
-  function joinGroup() {
-    var email = document.getElementById('emailInput').value.trim();
-    if (!email || email.indexOf('@') === -1) {
-      alert('Please enter a valid email address.');
-      return;
-    }
-    var subject = encodeURIComponent('Subscribe to WIN network');
-    var body = encodeURIComponent('Please add ' + email + ' to the Hanover WIN Google Group (win-network@googlegroups.com). Thank you!');
-    window.location.href = 'mailto:win-network@googlegroups.com?subject=' + subject + '&body=' + body;
-    document.getElementById('cta-confirm').style.display = 'block';
-    document.getElementById('emailInput').value = '';
+  if (window.location.search.indexOf('thanks=true') > -1) {
+  document.getElementById('cta-confirm').style.display = 'block';
   }
 </script>
 
