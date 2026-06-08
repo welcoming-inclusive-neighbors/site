@@ -44,7 +44,7 @@
     .winn-cta-btn { padding: 11px 28px; background: #1D6A3A; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; letter-spacing: 0.3px; transition: background 0.2s, transform 0.1s; }
     .winn-cta-btn:hover { background: #155228; transform: translateY(-1px); }
     .winn-cta-btn:active { transform: translateY(0); }
-    .winn-cta-note { font-size: 12px; color: #6a8f78; margin-top: 12px; }
+    .winn-cta-note { font-size: 12px; color: #6a8f78; margin-top: 12px; text-align: center; }
     #cta-confirm { margin-top: 14px; font-size: 15px; color: #1D6A3A; font-weight: 600; display: none; }
 
     /* MISSION */
@@ -73,8 +73,6 @@
       .winn-email-input { width: 100%; }
       .winn-cta-btn { width: 100%; }
       .winn-mission { padding: 36px 20px 28px; }
-
- 
     }
   </style>
 </head>
@@ -109,14 +107,10 @@
   method="POST"
 >
   <input
-    class="winn-email-input"
-    type="email"
-    name="email"
-    id="emailInput"
-    placeholder="your@email.com"
-    aria-label="Email address"
-    required
-  />
+    type="hidden"
+    name="_next"
+    value="https://welcoming-inclusive-neighbors.github.io/site/?thanks=true"
+  /> 
   <input
     type="hidden"
     name="_subject"
@@ -126,13 +120,16 @@
     type="hidden"
     name="_replyto"
     value="win-network@googlegroups.com"
+  /> <input
+    class="winn-email-input"
+    type="email"
+    name="email"
+    id="emailInput"
+    placeholder="your@email.com"
+    aria-label="Email address"
+    required
   />
   <button class="winn-cta-btn" type="submit">Stay in touch</button>
-  <input
-  type="hidden"
-  name="_next"
-  value="https://welcoming-inclusive-neighbors.github.io/site/?thanks=true"
-/>
 </form>
 <p class="winn-cta-note">Low volume. No spam. Unsubscribe anytime.</p>
 <p id="cta-confirm">Thanks! We'll be in touch soon. Welcome to the network.</p>
