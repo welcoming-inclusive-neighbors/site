@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resources – Welcoming and Inclusive Neighbors – Hanover, NH</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; color: #222; }
+
+    /* HEADER */
+    .winn-header { background: #fff; padding: 32px 24px 16px; text-align: center; }
+    .winn-logo-img { max-width: 340px; width: 80%; margin: 0 auto 8px; display: block; }
+
+    /* NAV */
+    .winn-nav { background: #f4f8f2; padding: 12px 24px; text-align: center; border-bottom: 1px solid #b0cdb8; }
+    .winn-nav a:link, .winn-nav a:visited { color: #1D6A3A; text-decoration: none; font-size: 15px; font-weight: 600; margin: 0 16px; }
+    .winn-nav a:hover { color: #2176AE; text-decoration: underline; }
+    .winn-nav a.active:link, .winn-nav a.active:visited { color: #2176AE; border-bottom: 2px solid #2176AE; padding-bottom: 2px; }
+
+    /* HERO */
+    .winn-page-hero { background: #f4f8f2; padding: 40px 24px 28px; text-align: center; }
+    .winn-page-hero h1 { font-size: clamp(22px, 3.5vw, 32px); font-weight: 700; color: #1D6A3A; margin-bottom: 12px; }
+    .winn-page-hero p { font-size: 16px; color: #3a5c47; max-width: 620px; margin: 0 auto; line-height: 1.65; }
+
+    /* RIVER */
+    .river-svg { width: 100%; display: block; }
+
+    /* CONTROLS */
+    .winn-controls { max-width: 820px; margin: 32px auto 0; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+    .winn-search { padding: 9px 14px; border-radius: 8px; border: 1.5px solid #1D6A3A; font-size: 14px; width: 240px; outline: none; color: #1a3326; background: #fff; transition: border-color 0.2s, box-shadow 0.2s; }
+    .winn-search:focus { border-color: #2176AE; box-shadow: 0 0 0 3px rgba(33,118,174,0.15); }
+    .winn-filter-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
+    .winn-filter-btn { padding: 7px 14px; border-radius: 20px; border: 1.5px solid #1D6A3A; background: #fff; color: #1D6A3A; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .winn-filter-btn:hover, .winn-filter-btn.active { background: #1D6A3A; color: #fff; }
+    .winn-count { font-size: 13px; color: #6a8f78; }
+
+    /* RESOURCE LIST */
+    .winn-resources { max-width: 820px; margin: 24px auto 48px; padding: 0 24px; }
+
+    .winn-resource-card {
+      border: 1px solid #d4e8da;
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+      background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .winn-resource-card:hover { border-color: #1D6A3A; box-shadow: 0 2px 12px rgba(29,106,58,0.08); }
+
+    .winn-resource-type {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .type-webpage    { background: #e6f1fb; color: #185FA5; }
+    .type-document   { background: #EAF3DE; color: #3B6D11; }
+    .type-book       { background: #FAEEDA; color: #854F0B; }
+    .type-report     { background: #e8f2ec; color: #1D6A3A; }
+    .type-article    { background: #FBEAF0; color: #993556; }
+    .type-other      { background: #F1EFE8; color: #5F5E5A; }
+
+    .winn-resource-title { font-size: 16px; font-weight: 700; color: #1D6A3A; margin-bottom: 6px; line-height: 1.35; }
+    .winn-resource-title a:link, .winn-resource-title a:visited { color: #1D6A3A; text-decoration: none; }
+    .winn-resource-title a:hover { color: #2176AE; text-decoration: underline; }
+
+    .winn-resource-meta { font-size: 13px; color: #6a8f78; margin-bottom: 8px; }
+    .winn-resource-abstract { font-size: 14px; color: #444; line-height: 1.6; }
+
+    /* LOADING / EMPTY STATES */
+    .winn-loading { text-align: center; padding: 48px 24px; color: #6a8f78; font-size: 15px; }
+    .winn-loading .spinner { width: 32px; height: 32px; border: 3px solid #d4e8da; border-top-color: #1D6A3A; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .winn-empty { text-align: center; padding: 48px 24px; color: #6a8f78; font-size: 15px; }
+
+    /* FOOTER */
+    .winn-footer { background: #1D6A3A; color: #c8e6d3; text-align: center; padding: 22px 16px; font-size: 13px; letter-spacing: 0.3px; line-height: 1.8; }
+    .winn-footer strong { color: #fff; }
+    .winn-footer a:link, .winn-footer a:visited { color: #a8dfc0; text-decoration: none; }
+    .winn-footer a:hover { color: #fff; text-decoration: underline; }
+
+    /* GLOBAL LINKS */
+    a:link, a:visited { color: #1D6A3A; text-decoration: none; }
+    a:hover, a:active { color: #2176AE; text-decoration: underline; }
+
+    @media (max-width: 540px) {
+      .winn-controls { flex-direction: column; align-items: flex-start; }
+      .winn-search { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="winn-header">
+  <img class="winn-logo-img" src="logo.png" alt="Welcoming and Inclusive Neighbors Network logo" />
+</header>
+
+<!-- NAV -->
+<nav class="winn-nav">
+  <a href="index.html">Home</a>
+  <a href="resources.html" class="active">Resources</a>
+</nav>
+
+<!-- HERO -->
+<section class="winn-page-hero">
+  <h1>Resources</h1>
+  <p>A living library of research, reports, and reading on housing, sustainability, missing middle development, and what it means to build a truly welcoming community. Updated as we learn.</p>
+</section>
+
+<!-- RIVER -->
+<svg class="river-svg" viewBox="0 0 1440 36" height="36" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <rect width="1440" height="36" fill="#f4f8f2"/>
+  <path d="M0,18 C180,4 360,32 600,18 C820,4 1040,32 1240,18 C1340,10 1400,26 1440,18" fill="none" stroke="#2176AE" stroke-width="8" stroke-linecap="round"/>
+</svg>
+
+<!-- CONTROLS -->
+<div class="winn-controls">
+  <input class="winn-search" type="search" id="searchInput" placeholder="Search resources..." aria-label="Search resources" />
+  <div class="winn-filter-wrap" id="filterWrap">
+    <button class="winn-filter-btn active" data-type="all" onclick="setFilter('all', this)">All</button>
+  </div>
+  <span class="winn-count" id="resourceCount"></span>
+</div>
+
+<!-- RESOURCE LIST -->
+<div class="winn-resources" id="resourceList">
+  <div class="winn-loading">
+    <div class="spinner"></div>
+    Loading resources from the WINN library...
+  </div>
+</div>
+
+<!-- RIVER -->
+<svg class="river-svg" viewBox="0 0 1440 36" height="36" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <path d="M0,18 C180,4 360,32 600,18 C820,4 1040,32 1240,18 C1340,10 1400,26 1440,18" fill="none" stroke="#2176AE" stroke-width="8" stroke-linecap="round"/>
+</svg>
+
+<!-- FOOTER -->
+<footer class="winn-footer">
+  <strong>Welcoming and Inclusive Neighbors &mdash; Hanover, NH</strong><br>
+  Guided by Hanover's 2024 Sustainability Master Plan<br>
+  <a href="mailto:win-network@googlegroups.com">win-network@googlegroups.com</a>
+</footer>
+
+<script>
+  var ZOTERO_API = 'https://api.zotero.org/groups/6584456/items?format=json&limit=100&sort=title&itemType=-attachment';
+  var allItems = [];
+  var currentFilter = 'all';
+  var currentSearch = '';
+
+  // Map Zotero item types to display labels and CSS classes
+  var typeMap = {
+    'webpage':          { label: 'Web',      cls: 'type-webpage'  },
+    'document':         { label: 'Document', cls: 'type-document' },
+    'book':             { label: 'Book',     cls: 'type-book'     },
+    'report':           { label: 'Report',   cls: 'type-report'   },
+    'journalArticle':   { label: 'Article',  cls: 'type-article'  },
+    'magazineArticle':  { label: 'Article',  cls: 'type-article'  },
+    'newspaperArticle': { label: 'Article',  cls: 'type-article'  },
+    'blogPost':         { label: 'Web',      cls: 'type-webpage'  },
+  };
+
+  function getType(itemType) {
+    return typeMap[itemType] || { label: 'Resource', cls: 'type-other' };
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    var year = dateStr.substring(0, 4);
+    return year && year.match(/^\d{4}$/) ? year : '';
+  }
+
+  function buildMeta(item) {
+    var parts = [];
+    var creators = item.creators || [];
+    if (creators.length > 0) {
+      var names = creators.slice(0, 3).map(function(c) {
+        return c.lastName ? (c.lastName + (c.firstName ? ', ' + c.firstName.charAt(0) + '.' : '')) : c.name || '';
+      }).filter(Boolean);
+      if (creators.length > 3) names.push('et al.');
+      if (names.length) parts.push(names.join('; '));
+    }
+    if (item.publisher) parts.push(item.publisher);
+    if (item.websiteTitle) parts.push(item.websiteTitle);
+    var year = formatDate(item.date);
+    if (year) parts.push(year);
+    return parts.join(' &middot; ');
+  }
+
+  function renderCards(items) {
+    var list = document.getElementById('resourceList');
+    var count = document.getElementById('resourceCount');
+
+    if (items.length === 0) {
+      list.innerHTML = '<div class="winn-empty">No resources found. Try a different search or filter.</div>';
+      count.textContent = '';
+      return;
+    }
+
+    count.textContent = items.length + ' resource' + (items.length !== 1 ? 's' : '');
+
+    list.innerHTML = items.map(function(item) {
+      var d = item.data;
+      var t = getType(d.itemType);
+      var meta = buildMeta(d);
+      var abstract = d.abstractNote ? '<p class="winn-resource-abstract">' + d.abstractNote + '</p>' : '';
+      var title = d.url
+        ? '<a href="' + d.url + '" target="_blank" rel="noopener">' + d.title + ' &rarr;</a>'
+        : d.title;
+
+      return '<div class="winn-resource-card" data-type="' + d.itemType + '">'
+        + '<span class="winn-resource-type ' + t.cls + '">' + t.label + '</span>'
+        + '<div class="winn-resource-title">' + title + '</div>'
+        + (meta ? '<div class="winn-resource-meta">' + meta + '</div>' : '')
+        + abstract
+        + '</div>';
+    }).join('');
+  }
+
+  function applyFilters() {
+    var filtered = allItems.filter(function(item) {
+      var d = item.data;
+      var matchesFilter = currentFilter === 'all' || d.itemType === currentFilter;
+      var searchTerm = currentSearch.toLowerCase();
+      var matchesSearch = !searchTerm
+        || (d.title && d.title.toLowerCase().indexOf(searchTerm) > -1)
+        || (d.abstractNote && d.abstractNote.toLowerCase().indexOf(searchTerm) > -1)
+        || (d.publisher && d.publisher.toLowerCase().indexOf(searchTerm) > -1)
+        || (d.websiteTitle && d.websiteTitle.toLowerCase().indexOf(searchTerm) > -1);
+      return matchesFilter && matchesSearch;
+    });
+    renderCards(filtered);
+  }
+
+  function buildFilterButtons(items) {
+    var types = {};
+    items.forEach(function(item) {
+      var t = item.data.itemType;
+      types[t] = (types[t] || 0) + 1;
+    });
+    var wrap = document.getElementById('filterWrap');
+    Object.keys(types).forEach(function(t) {
+      if (typeMap[t]) {
+        var btn = document.createElement('button');
+        btn.className = 'winn-filter-btn';
+        btn.setAttribute('data-type', t);
+        btn.textContent = typeMap[t].label + ' (' + types[t] + ')';
+        btn.onclick = function() { setFilter(t, btn); };
+        wrap.appendChild(btn);
+      }
+    });
+  }
+
+  function setFilter(type, btn) {
+    currentFilter = type;
+    document.querySelectorAll('.winn-filter-btn').forEach(function(b) {
+      b.classList.toggle('active', b === btn);
+    });
+    applyFilters();
+  }
+
+  // Search with debounce
+  var searchTimeout;
+  document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    var val = this.value;
+    searchTimeout = setTimeout(function() {
+      currentSearch = val;
+      applyFilters();
+    }, 250);
+  });
+
+  // Fetch from Zotero API
+  fetch(ZOTERO_API)
+    .then(function(res) {
+      if (!res.ok) throw new Error('API error');
+      return res.json();
+    })
+    .then(function(data) {
+      allItems = data.filter(function(item) {
+        return item.data && item.data.title;
+      });
+      buildFilterButtons(allItems);
+      renderCards(allItems);
+    })
+    .catch(function() {
+      document.getElementById('resourceList').innerHTML =
+        '<div class="winn-empty">Unable to load resources right now. Please visit the <a href="https://www.zotero.org/groups/6584456/hanoverwins/library" target="_blank">WINN Zotero library</a> directly.</div>';
+    });
+</script>
+
+</body>
+</html>
