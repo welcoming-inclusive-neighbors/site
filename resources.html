@@ -93,6 +93,38 @@
       .winn-controls { flex-direction: column; align-items: flex-start; }
       .winn-search { width: 100%; }
     }
+
+    /* FEATURED CARD */
+  .winn-resource-featured {
+  border: 2px solid #1D6A3A;
+  background: #f4f8f2;
+}
+
+.winn-featured-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #1D6A3A;
+  color: #fff;
+  margin-bottom: 8px;
+  margin-right: 6px;
+}
+
+/* SECTION LABELS */
+.winn-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #6a8f78;
+  margin: 28px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #d4e8da;
+}
   </style>
 </head>
 <body>
@@ -149,151 +181,172 @@
 </footer>
 
 <script>
-  var ZOTERO_API = 'https://api.zotero.org/groups/6584456/items?format=json&limit=100&sort=title&itemType=-attachment';
-  var allItems = [];
-  var currentFilter = 'all';
-  var currentSearch = '';
+ var ZOTERO_API = 'https://api.zotero.org/groups/6584456/items?format=json&limit=100&sort=title&itemType=-attachment';
+var allItems = [];
+var currentFilter = 'all';
+var currentSearch = '';
 
-  // Map Zotero item types to display labels and CSS classes
-  var typeMap = {
-    'webpage':          { label: 'Web',      cls: 'type-webpage'  },
-    'document':         { label: 'Document', cls: 'type-document' },
-    'book':             { label: 'Book',     cls: 'type-book'     },
-    'report':           { label: 'Report',   cls: 'type-report'   },
-    'journalArticle':   { label: 'Article',  cls: 'type-article'  },
-    'magazineArticle':  { label: 'Article',  cls: 'type-article'  },
-    'newspaperArticle': { label: 'Article',  cls: 'type-article'  },
-    'blogPost':         { label: 'Web',      cls: 'type-webpage'  },
-  };
+var typeMap = {
+  'webpage':          { label: 'Web',      cls: 'type-webpage'  },
+  'document':         { label: 'Document', cls: 'type-document' },
+  'book':             { label: 'Book',     cls: 'type-book'     },
+  'report':           { label: 'Report',   cls: 'type-report'   },
+  'journalArticle':   { label: 'Article',  cls: 'type-article'  },
+  'magazineArticle':  { label: 'Article',  cls: 'type-article'  },
+  'newspaperArticle': { label: 'Article',  cls: 'type-article'  },
+  'blogPost':         { label: 'Web',      cls: 'type-webpage'  },
+};
 
-  function getType(itemType) {
-    return typeMap[itemType] || { label: 'Resource', cls: 'type-other' };
+function getType(itemType) {
+  return typeMap[itemType] || { label: 'Resource', cls: 'type-other' };
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  var year = dateStr.substring(0, 4);
+  return year && year.match(/^\d{4}$/) ? year : '';
+}
+
+function buildMeta(item) {
+  var parts = [];
+  var creators = item.creators || [];
+  if (creators.length > 0) {
+    var names = creators.slice(0, 3).map(function(c) {
+      return c.lastName ? (c.lastName + (c.firstName ? ', ' + c.firstName.charAt(0) + '.' : '')) : c.name || '';
+    }).filter(Boolean);
+    if (creators.length > 3) names.push('et al.');
+    if (names.length) parts.push(names.join('; '));
+  }
+  if (item.publisher) parts.push(item.publisher);
+  if (item.websiteTitle) parts.push(item.websiteTitle);
+  var year = formatDate(item.date);
+  if (year) parts.push(year);
+  return parts.join(' &middot; ');
+}
+
+function isFeatured(item) {
+  return item.data.extra && item.data.extra.toLowerCase().trim() === 'featured';
+}
+
+function buildCard(item, featured) {
+  var d = item.data;
+  var t = getType(d.itemType);
+  var meta = buildMeta(d);
+  var abstract = d.abstractNote ? '<p class="winn-resource-abstract">' + d.abstractNote + '</p>' : '';
+  var title = d.url
+    ? '<a href="' + d.url + '" target="_blank" rel="noopener">' + d.title + ' &rarr;</a>'
+    : d.title;
+  var featuredBadge = featured
+    ? '<span class="winn-featured-badge">Featured</span>'
+    : '';
+  var cardClass = featured ? 'winn-resource-card winn-resource-featured' : 'winn-resource-card';
+
+  return '<div class="' + cardClass + '" data-type="' + d.itemType + '">'
+    + featuredBadge
+    + '<span class="winn-resource-type ' + t.cls + '">' + t.label + '</span>'
+    + '<div class="winn-resource-title">' + title + '</div>'
+    + (meta ? '<div class="winn-resource-meta">' + meta + '</div>' : '')
+    + abstract
+    + '</div>';
+}
+
+function renderCards(items) {
+  var list = document.getElementById('resourceList');
+  var count = document.getElementById('resourceCount');
+
+  if (items.length === 0) {
+    list.innerHTML = '<div class="winn-empty">No resources found. Try a different search or filter.</div>';
+    count.textContent = '';
+    return;
   }
 
-  function formatDate(dateStr) {
-    if (!dateStr) return '';
-    var year = dateStr.substring(0, 4);
-    return year && year.match(/^\d{4}$/) ? year : '';
-  }
+  count.textContent = items.length + ' resource' + (items.length !== 1 ? 's' : '');
 
-  function buildMeta(item) {
-    var parts = [];
-    var creators = item.creators || [];
-    if (creators.length > 0) {
-      var names = creators.slice(0, 3).map(function(c) {
-        return c.lastName ? (c.lastName + (c.firstName ? ', ' + c.firstName.charAt(0) + '.' : '')) : c.name || '';
-      }).filter(Boolean);
-      if (creators.length > 3) names.push('et al.');
-      if (names.length) parts.push(names.join('; '));
+  // Separate featured from regular
+  var featured = items.filter(function(item) { return isFeatured(item); });
+  var regular = items.filter(function(item) { return !isFeatured(item); });
+
+  // Featured section header
+  var html = '';
+  if (featured.length > 0) {
+    html += '<div class="winn-section-label">Featured</div>';
+    html += featured.map(function(item) { return buildCard(item, true); }).join('');
+    if (regular.length > 0) {
+      html += '<div class="winn-section-label">All Resources</div>';
     }
-    if (item.publisher) parts.push(item.publisher);
-    if (item.websiteTitle) parts.push(item.websiteTitle);
-    var year = formatDate(item.date);
-    if (year) parts.push(year);
-    return parts.join(' &middot; ');
   }
+  html += regular.map(function(item) { return buildCard(item, false); }).join('');
+  list.innerHTML = html;
+}
 
-  function renderCards(items) {
-    var list = document.getElementById('resourceList');
-    var count = document.getElementById('resourceCount');
-
-    if (items.length === 0) {
-      list.innerHTML = '<div class="winn-empty">No resources found. Try a different search or filter.</div>';
-      count.textContent = '';
-      return;
-    }
-
-    count.textContent = items.length + ' resource' + (items.length !== 1 ? 's' : '');
-
-    list.innerHTML = items.map(function(item) {
-      var d = item.data;
-      var t = getType(d.itemType);
-      var meta = buildMeta(d);
-      var abstract = d.abstractNote ? '<p class="winn-resource-abstract">' + d.abstractNote + '</p>' : '';
-      var title = d.url
-        ? '<a href="' + d.url + '" target="_blank" rel="noopener">' + d.title + ' &rarr;</a>'
-        : d.title;
-
-      return '<div class="winn-resource-card" data-type="' + d.itemType + '">'
-        + '<span class="winn-resource-type ' + t.cls + '">' + t.label + '</span>'
-        + '<div class="winn-resource-title">' + title + '</div>'
-        + (meta ? '<div class="winn-resource-meta">' + meta + '</div>' : '')
-        + abstract
-        + '</div>';
-    }).join('');
-  }
-
-  function applyFilters() {
-    var filtered = allItems.filter(function(item) {
-      var d = item.data;
-      var matchesFilter = currentFilter === 'all' || d.itemType === currentFilter;
-      var searchTerm = currentSearch.toLowerCase();
-      var matchesSearch = !searchTerm
-        || (d.title && d.title.toLowerCase().indexOf(searchTerm) > -1)
-        || (d.abstractNote && d.abstractNote.toLowerCase().indexOf(searchTerm) > -1)
-        || (d.publisher && d.publisher.toLowerCase().indexOf(searchTerm) > -1)
-        || (d.websiteTitle && d.websiteTitle.toLowerCase().indexOf(searchTerm) > -1);
-      return matchesFilter && matchesSearch;
-    });
-    renderCards(filtered);
-  }
-
-  function buildFilterButtons(items) {
-    var types = {};
-    items.forEach(function(item) {
-      var t = item.data.itemType;
-      types[t] = (types[t] || 0) + 1;
-    });
-    var wrap = document.getElementById('filterWrap');
-    Object.keys(types).forEach(function(t) {
-      if (typeMap[t]) {
-        var btn = document.createElement('button');
-        btn.className = 'winn-filter-btn';
-        btn.setAttribute('data-type', t);
-        btn.textContent = typeMap[t].label + ' (' + types[t] + ')';
-        btn.onclick = function() { setFilter(t, btn); };
-        wrap.appendChild(btn);
-      }
-    });
-  }
-
-  function setFilter(type, btn) {
-    currentFilter = type;
-    document.querySelectorAll('.winn-filter-btn').forEach(function(b) {
-      b.classList.toggle('active', b === btn);
-    });
-    applyFilters();
-  }
-
-  // Search with debounce
-  var searchTimeout;
-  document.getElementById('searchInput').addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    var val = this.value;
-    searchTimeout = setTimeout(function() {
-      currentSearch = val;
-      applyFilters();
-    }, 250);
+function applyFilters() {
+  var filtered = allItems.filter(function(item) {
+    var d = item.data;
+    var matchesFilter = currentFilter === 'all' || d.itemType === currentFilter;
+    var searchTerm = currentSearch.toLowerCase();
+    var matchesSearch = !searchTerm
+      || (d.title && d.title.toLowerCase().indexOf(searchTerm) > -1)
+      || (d.abstractNote && d.abstractNote.toLowerCase().indexOf(searchTerm) > -1)
+      || (d.publisher && d.publisher.toLowerCase().indexOf(searchTerm) > -1)
+      || (d.websiteTitle && d.websiteTitle.toLowerCase().indexOf(searchTerm) > -1);
+    return matchesFilter && matchesSearch;
   });
+  renderCards(filtered);
+}
 
-  // Fetch from Zotero API
-  fetch(ZOTERO_API)
-    .then(function(res) {
-      if (!res.ok) throw new Error('API error');
-      return res.json();
-    })
-    .then(function(data) {
-      allItems = data.filter(function(item) {
-        return item.data && item.data.title;
-      });
-      buildFilterButtons(allItems);
-      renderCards(allItems);
-    })
-    .catch(function() {
-      document.getElementById('resourceList').innerHTML =
-        '<div class="winn-empty">Unable to load resources right now. Please visit the <a href="https://www.zotero.org/groups/6584456/hanoverwins/library" target="_blank">WINN Zotero library</a> directly.</div>';
+function buildFilterButtons(items) {
+  var types = {};
+  items.forEach(function(item) {
+    var t = item.data.itemType;
+    types[t] = (types[t] || 0) + 1;
+  });
+  var wrap = document.getElementById('filterWrap');
+  Object.keys(types).forEach(function(t) {
+    if (typeMap[t]) {
+      var btn = document.createElement('button');
+      btn.className = 'winn-filter-btn';
+      btn.setAttribute('data-type', t);
+      btn.textContent = typeMap[t].label + ' (' + types[t] + ')';
+      btn.onclick = function() { setFilter(t, btn); };
+      wrap.appendChild(btn);
+    }
+  });
+}
+
+function setFilter(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.winn-filter-btn').forEach(function(b) {
+    b.classList.toggle('active', b === btn);
+  });
+  applyFilters();
+}
+
+var searchTimeout;
+document.getElementById('searchInput').addEventListener('input', function() {
+  clearTimeout(searchTimeout);
+  var val = this.value;
+  searchTimeout = setTimeout(function() {
+    currentSearch = val;
+    applyFilters();
+  }, 250);
+});
+
+fetch(ZOTERO_API)
+  .then(function(res) {
+    if (!res.ok) throw new Error('API error');
+    return res.json();
+  })
+  .then(function(data) {
+    allItems = data.filter(function(item) {
+      return item.data && item.data.title;
     });
-</script>
+    buildFilterButtons(allItems);
+    renderCards(allItems);
+  })
+  .catch(function() {
+    document.getElementById('resourceList').innerHTML =
+      '<div class="winn-empty">Unable to load resources right now. Please visit the <a href="https://www.zotero.org/groups/6584456/hanoverwins/library" target="_blank">WINN Zotero library</a> directly.</div>';
+  });</script>
 
 </body>
 </html>
